@@ -551,9 +551,7 @@
 
 // export default DimPayment;
 
-
-
-
+'use client';
 
 
 import React, { useState, useEffect, useRef } from "react";
