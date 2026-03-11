@@ -486,8 +486,8 @@
 //   );
 // }
 
-
 'use client';
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   useGetPendingApprovalsQuery,
@@ -508,11 +508,33 @@ export default function Level1Approval({ user }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const [currentUserName, setCurrentUserName] = useState('Unknown User');
+
+  // Improved admin detection – handles your actual data structure
+  const isAdmin = Boolean(
+    user &&
+    String(user.userType || user.role || '').trim().toUpperCase() === 'ADMIN'
+  );
+
   const searchInputRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Get logged-in user's name – priority: sessionStorage > prop
-  const currentUserName = sessionStorage.getItem("name") || user?.name || "Unknown User";
+  // Safely read name from sessionStorage (client only)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const storedName = sessionStorage.getItem('name');
+    if (storedName) {
+      setCurrentUserName(storedName);
+      return;
+    }
+
+    // Fallback to prop if available
+    if (user?.name) {
+      setCurrentUserName(user.name);
+      sessionStorage.setItem('name', user.name);
+    }
+  }, [user?.name]);
 
   const rawData = useMemo(() => {
     if (apiResponse?.data && Array.isArray(apiResponse.data)) {
@@ -527,7 +549,7 @@ export default function Level1Approval({ user }) {
   const parsedItems = useMemo(() => {
     if (!rawData.length) return [];
 
-    const items = rawData
+    return rawData
       .map((item) => {
         const rawAmount = String(item.Amount || item.amount || '0').replace(/,/g, '');
         const parsedAmount = Number(rawAmount) || 0;
@@ -538,7 +560,7 @@ export default function Level1Approval({ user }) {
           office: String(item.OFFICE_NAME_1 || '').trim(),
           payee: String(item.PAYEE_NAME_1 || '').trim(),
           head: String(item.EXPENSES_HEAD_1 || '').trim(),
-          subhead: String(item.EXPENSES_SUBHEAD_1 || '').trim(),          // ← already there
+          subhead: String(item.EXPENSES_SUBHEAD_1 || '').trim(),
           itemName: String(item.ITEM_NAME_1 || '').trim(),
           unit: String(item.UNIT_1 || '').trim(),
           qty: String(item.Qty_1 || item.QTY_1 || '1').trim(),
@@ -547,21 +569,23 @@ export default function Level1Approval({ user }) {
           photo: String(item.Bill_Photo || item.bill_photo || 'No file uploaded').trim(),
           originalRemark: String(item.REMARK_1 || '').trim(),
           approvalDoer: String(item.APPROVAL_DOER || item.approval_doer || '').trim(),
-          office_name: String(item.OFFICE_NAME_1 || '').trim(),
-          payee_name: String(item.PAYEE_NAME_1 || '').trim(),
         };
       })
       .filter((item) => {
-        return (
-          item.OFFBILLUID &&
-          item.uid &&
-          item.amount > 0 &&
-          item.approvalDoer.toLowerCase() === currentUserName.toLowerCase()
-        );
-      });
+        // Basic validation – must have required fields
+        if (!item.OFFBILLUID || !item.uid || item.amount <= 0) {
+          return false;
+        }
 
-    return items;
-  }, [rawData, currentUserName]);
+        // Admin sees ALL valid pending items
+        if (isAdmin) {
+          return true;
+        }
+
+        // Normal user only sees items assigned to them
+        return item.approvalDoer.toLowerCase() === currentUserName.toLowerCase();
+      });
+  }, [rawData, currentUserName, isAdmin]);
 
   const billGroups = useMemo(() => {
     const groups = {};
@@ -716,14 +740,23 @@ export default function Level1Approval({ user }) {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-indigo-900 to-indigo-800 bg-clip-text text-transparent mb-2">
-              Level 1 Approvals
+              {isAdmin ? 'All Pending Approvals (Admin View)' : 'Level 1 Approvals'}
             </h1>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <div className="h-2 w-2 rounded-full bg-indigo-600"></div>
               <p className="text-slate-600 font-medium">
-                {parsedItems.length} items pending your review
+                {parsedItems.length} items pending review
               </p>
-              <span className="text-sm text-slate-500">• Logged in as: <strong>{currentUserName}</strong></span>
+
+              {isAdmin && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  Admin – Showing All Bills
+                </span>
+              )}
+
+              <span className="text-sm text-slate-500">
+                • Logged in as: <strong>{currentUserName}</strong>
+              </span>
             </div>
           </div>
 
@@ -745,7 +778,7 @@ export default function Level1Approval({ user }) {
             </div>
             <h2 className="text-xl font-semibold text-slate-800 mb-2">All caught up!</h2>
             <p className="text-slate-600">
-              No pending approvals assigned to <strong>{currentUserName}</strong> right now.
+              No pending approvals {isAdmin ? 'in the system' : `assigned to ${currentUserName}`} right now.
             </p>
           </div>
         )}
@@ -799,7 +832,9 @@ export default function Level1Approval({ user }) {
                             >
                               <div className="font-semibold text-slate-900">{bill.id}</div>
                               <div className="text-sm text-slate-500 mt-1">
-                                {bill.itemCount} items • <span className="font-medium text-indigo-600">₹{bill.totalAmount.toLocaleString('en-IN')}</span>
+                                {bill.itemCount} items • <span className="font-medium text-indigo-600">
+                                  ₹{bill.totalAmount.toLocaleString('en-IN')}
+                                </span>
                               </div>
                             </div>
                           ))}
@@ -827,17 +862,17 @@ export default function Level1Approval({ user }) {
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900 mb-2">Bill Details</h2>
-                  <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-6 text-sm flex-wrap">
                     <div>
                       <p className="text-slate-600">Bill UID</p>
                       <p className="font-semibold text-indigo-600 text-lg">{selectedBillId}</p>
                     </div>
-                    <div className="h-12 w-px bg-slate-200"></div>
+                    <div className="h-12 w-px bg-slate-200 hidden sm:block" />
                     <div>
                       <p className="text-slate-600">Items</p>
                       <p className="font-semibold text-slate-900 text-lg">{currentItems.length}</p>
                     </div>
-                    <div className="h-12 w-px bg-slate-200"></div>
+                    <div className="h-12 w-px bg-slate-200 hidden sm:block" />
                     <div>
                       <p className="text-slate-600">Total Amount</p>
                       <p className="font-bold text-emerald-600 text-lg">
@@ -850,7 +885,7 @@ export default function Level1Approval({ user }) {
               </div>
             </div>
 
-            {/* Table - Subhead column added */}
+            {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -859,12 +894,12 @@ export default function Level1Approval({ user }) {
                     <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">Office</th>
                     <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">Payee</th>
                     <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">Head</th>
-                    <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">Subhead</th> {/* ← NEW */}
+                    <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">Subhead</th>
                     <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">Item Name</th>
                     <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">Qty</th>
                     <th className="px-6 py-4 text-right font-semibold text-slate-900 uppercase text-xs tracking-wide">Original</th>
                     <th className="px-6 py-4 text-right font-semibold text-slate-900 uppercase text-xs tracking-wide">Revised</th>
-                    <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">EXP By</th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">Raised By</th>
                     <th className="px-6 py-4 text-left font-semibold text-slate-900 uppercase text-xs tracking-wide">Remark</th>
                     <th className="px-6 py-4 text-center font-semibold text-slate-900 uppercase text-xs tracking-wide">Bill Photo</th>
                   </tr>
@@ -876,7 +911,7 @@ export default function Level1Approval({ user }) {
                       <td className="px-6 py-4 text-slate-700">{item.office || '-'}</td>
                       <td className="px-6 py-4 text-slate-700">{item.payee || '-'}</td>
                       <td className="px-6 py-4 text-slate-700">{item.head || '-'}</td>
-                      <td className="px-6 py-4 text-slate-700">{item.subhead || '-'}</td> {/* ← NEW */}
+                      <td className="px-6 py-4 text-slate-700">{item.subhead || '-'}</td>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-slate-900">{item.itemName}</div>
                       </td>
@@ -945,9 +980,9 @@ export default function Level1Approval({ user }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-3">You are approving as</label>
+                  <label className="block text-sm font-semibold text-slate-900 mb-3">Approving as</label>
                   <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl font-medium text-indigo-900">
-                    {currentUserName}
+                    {currentUserName} {isAdmin && '(Admin)'}
                   </div>
                 </div>
               </div>
