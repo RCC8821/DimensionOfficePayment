@@ -222,9 +222,9 @@ import Payment   from '../Office/Payment/page';
 // Naya user type aaye to bas ek nai line add karo
 const USER_TABS = {
   ADMIN:      ['summary', 'approve1', 'approve2', 'billentry', 'payment'],
-  VIJAY:  ['approve1'],
-  APPROVEL2:  ['summary', 'approve2'],
-  // ACCOUNTANT: ['summary', 'billentry', 'payment'],
+  VIJAY:  ['approve1','billentry','payment'],
+  RICHA:  ['approve1'],
+ 
 };
 
 // Office dropdown mein kaunse tabs aate hain

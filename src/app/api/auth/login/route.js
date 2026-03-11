@@ -8,6 +8,7 @@ const ALLOWED_USER_TYPES = [
   'ADMIN',
   'VIJAY',
   'Approvel2',
+  'RICHA',
 ];
 
 export async function POST(request) {

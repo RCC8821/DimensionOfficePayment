@@ -57,7 +57,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-800 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
@@ -66,7 +66,7 @@ export default function LoginPage() {
       </div>
 
       {/* Login Card */}
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md ">
         {/* Decorative Elements */}
         <div className="absolute -top-4 -right-4">
           <div className="w-16 h-16 bg-yellow-300/30 rounded-full blur-xl"></div>
@@ -181,18 +181,8 @@ export default function LoginPage() {
               )}
             </button>
 
-            {/* Demo Credentials */}
-            <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10">
-              <p className="text-sm text-purple-200 text-center mb-2">Demo Credentials:</p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="text-purple-300">Email:</div>
-                <div className="text-white font-medium">nandu@gmail.com</div>
-                <div className="text-purple-300">Password:</div>
-                <div className="text-white font-medium">nandu@123</div>
-                <div className="text-purple-300">Type:</div>
-                <div className="text-white font-medium">ADMIN</div>
-              </div>
-            </div>
+           
+           
           </form>
 
           {/* Sign Up Link */}
