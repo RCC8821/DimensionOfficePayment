@@ -3,8 +3,8 @@ import Providers from "./providers";
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <Providers>{children}</Providers>
+      <body className="flex-1 w-full overflow-x-hidden">
+        <Providers >{children}</Providers>
       </body>
     </html>
   );
