@@ -8,6 +8,7 @@ import {reconciliationAPI} from './features/reconciliation/reconciliationSlice'
 import {formAPI} from './features/reconciliation/formSlice'
 import {actualPaymentApi} from './features/reconciliation/ActualPaymentSlice'
 import {transferBankAPI} from './features/reconciliation/transferBankSlice'
+import {expensesForm} from './features/expensesForm'
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,8 @@ export const store = configureStore({
     [approve2Api.reducerPath]: approve2Api.reducer,
     [billEntryApi.reducerPath]: billEntryApi.reducer,
     [dimPaymentApi.reducerPath]: dimPaymentApi.reducer,
+    [expensesForm.reducerPath]: expensesForm.reducer,
+
     /////recociliation ///
 
     [reconciliationAPI.reducerPath]: reconciliationAPI.reducer,
@@ -31,6 +34,7 @@ export const store = configureStore({
   .concat(approve2Api.middleware)
   .concat(billEntryApi.middleware)
   .concat(dimPaymentApi.middleware)
+  .concat(expensesForm.middleware)
 
   /// reconciliton ///
 

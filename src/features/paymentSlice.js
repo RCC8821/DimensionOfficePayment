@@ -2,7 +2,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Option 1: Sabse simple (sabse zyada log yahi use karte hain)
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";  
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 // ↑↑ fallback "" empty string dena safe hai
 
 // Option 2: Agar undefined hone pe error dena chahte ho (strict mode)

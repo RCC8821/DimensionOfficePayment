@@ -1,8 +1,11 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, LogIn } from 'lucide-react';
+import { Mail, Lock, LogIn, Receipt } from 'lucide-react';
+import Image from 'next/image';
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,24 +31,20 @@ export default function LoginPage() {
       console.log('Login response:', data);
 
       if (data.success) {
-        // Token sessionStorage mein save karo
         sessionStorage.setItem('token', data.token);
         
-        // User data sessionStorage mein save karo - IMPORTANT: saare fields
         const userData = {
-          email: formData.email,  // formData.email se
-          userType: data.userType,  // API se aaya userType (ADMIN/PAYMENT/RCC/DIMENSION/VRN)
-          name: data.name  // API se aaya name
+          email: formData.email,
+          userType: data.userType,
+          name: data.name
         };
         
         sessionStorage.setItem('user', JSON.stringify(userData));
         
         console.log('User saved in sessionStorage:', userData);
         
-        // Redirect to dashboard
         router.push('/dashboard');
       } else {
-        // Agar success false hai to error show karo
         setError(data.error || data.message || 'Login failed');
       }
     } catch (err) {
@@ -57,39 +56,44 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-800 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse animation-delay-4000"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse animation-delay-4000"></div>
       </div>
 
       {/* Login Card */}
-      <div className="relative w-full max-w-md ">
+      <div className="relative w-full max-w-md">
         {/* Decorative Elements */}
         <div className="absolute -top-4 -right-4">
-          <div className="w-16 h-16 bg-yellow-300/30 rounded-full blur-xl"></div>
+          <div className="w-16 h-16 bg-indigo-200/50 rounded-full blur-xl"></div>
         </div>
         
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-gray-200">
           
           {/* Logo with Animation */}
           <div className="flex justify-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 hover:scale-110 transition-all duration-300">
-              <LogIn className="w-10 h-10 text-white" />
+            <div className="w-20 h-20  rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 hover:scale-110 transition-all duration-300">
+              <Image 
+        src="/dimensions-logo.jpg"   // 因为文件在 public 文件夹下
+        alt="Dimension Logo" 
+        width={100}       // 必须指定宽高，以防止布局偏移
+        height={50}
+      />
             </div>
           </div>
 
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-purple-200">Sign in to your dashboard</p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+            <p className="text-gray-500">Sign in to your dashboard</p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg backdrop-blur-sm animate-shake">
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg animate-shake">
               <div className="flex items-center">
                 <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -103,15 +107,15 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-purple-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
               </label>
               <div className="relative group">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 w-5 h-5 group-focus-within:text-white transition-colors" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-indigo-500 transition-colors" />
                 <input
                   type="email"
                   placeholder="nandu@gmail.com"
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition-all"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
@@ -122,15 +126,15 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-purple-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <div className="relative group">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 w-5 h-5 group-focus-within:text-white transition-colors" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-indigo-500 transition-colors" />
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition-all"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                   required
@@ -144,13 +148,13 @@ export default function LoginPage() {
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded border-white/20 bg-white/10 text-purple-600 focus:ring-purple-500 focus:ring-offset-0"
+                  className="w-4 h-4 rounded border-gray-300 bg-gray-50 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0"
                 />
-                <span className="text-sm text-purple-200">Remember me</span>
+                <span className="text-sm text-gray-500">Remember me</span>
               </label>
               <button
                 type="button"
-                className="text-sm text-purple-200 hover:text-white transition-colors"
+                className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors font-medium"
               >
                 Forgot Password?
               </button>
@@ -180,34 +184,42 @@ export default function LoginPage() {
                 </span>
               )}
             </button>
-
-           
-           
           </form>
 
           {/* Sign Up Link */}
-          <p className="text-center text-purple-200 text-sm mt-6">
-            Don't have an account?{' '}
-            <button
-              type="button"
-              className="text-white font-medium hover:underline focus:outline-none"
-            >
-              Sign up
-            </button>
-          </p>
+      
+
+          {/* Divider */}
+          <div className="flex items-center my-5">
+            <div className="flex-1 border-t border-gray-200"></div>
+            <span className="px-3 text-xs text-gray-400 uppercase">or</span>
+            <div className="flex-1 border-t border-gray-200"></div>
+          </div>
+
+          {/* Office Expense Form Button */}
+          <button
+            type="button"
+            onClick={() => router.push('/OfficeExpensesForm')}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden group"
+          >
+            <span className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-700 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <Receipt className="w-5 h-5 relative" />
+            <span className="relative">Office Expense Form</span>
+            <svg className="ml-1 w-5 h-5 relative group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </button>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-purple-300 text-sm mt-8">
-          © 2024 Your Company. All rights reserved.
-        </p>
+       
       </div>
 
       {/* Custom Animations */}
       <style jsx>{`
         @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 0.2; }
-          50% { transform: scale(1.1); opacity: 0.3; }
+          0%, 100% { transform: scale(1); opacity: 0.3; }
+          50% { transform: scale(1.1); opacity: 0.4; }
         }
         .animate-pulse {
           animation: pulse 4s ease-in-out infinite;
